@@ -7,16 +7,16 @@ var trip_data = [{"lat" : -9.6993,
  	"NoStory" : ""
 }}]
 
-var country_data = []
-
-for (i of guest_countries) {
-  for (j of country_codes)
-  if (i.Nationality == j.name)
-  country_data.push({
-    "name" : i.Nationality,
-    "code" : j.countrycode,
-    "guest_count" : i.NumberofGuests})
-  }
+// var country_data = []
+//
+// for (i of guest_countries) {
+//   for (j of country_codes)
+//   if (i.Nationality == j.name)
+//   country_data.push({
+//     "name" : i.Nationality,
+//     "code" : j.countrycode,
+//     "guest_count" : i.NumberofGuests})
+//   }
 
 
 //

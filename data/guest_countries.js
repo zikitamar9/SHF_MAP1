@@ -151,11 +151,53 @@ var guest_countries = [
   }
 ]
 
-// d3.csv("/data/SHF_guests.csv.csv", function(data) {
-//     data.forEach(function(d) {
-//     d.date = parseDate(d.date);
-//     d.close = +d.close;});
-//
+var final_codes = []
+var final_guests = []
+var country_tocode = {}
+
+
+var country_codes = d3.csv("/data/country_codes.csv", function(data) {
+    data.forEach(function(row) {
+      country_tocode[row["name"]] = row["country-code"]
+        row.close = +row.close;
+      })
+      console.log(final_codes)
+      // console.log(d)
+
+  });
+
+var guest_data = d3.csv("/data/SHF_guests.csv", function(data) {
+    data.forEach(function(row) {
+      var dict = {
+        name: row["Nationality"],
+        guest_count: row['Number of Guests'],
+        country_code: country_tocode[row["Nationality"]]
+      };
+      final_guests.push(dict)
+      row.close = +row.close;
+    })
+
+  });
+
+
+
+
+
+// for(country in guest_data) {
+//   var dict = {
+//     name: country[Nationality],
+//     guest_count: country['Number of Guests:'],
+//     // country_code: countrycode[country[Nationality][country_code["country code"]]]
+//   };
+
+
+
+
+
+
+
+
+
 // d3.csv("/data/SHF_guests.csv.csv", function(d) {
 //   return {
 //     nationality : +d["Nationality"],

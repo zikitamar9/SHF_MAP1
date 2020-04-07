@@ -1,4 +1,4 @@
-var country_codes = [
+var country_codes2 = [
   {
     "name": "Afghanistan",
     "alpha-2": "AF",
