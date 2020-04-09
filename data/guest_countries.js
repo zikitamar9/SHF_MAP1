@@ -153,31 +153,57 @@ var guest_countries = [
 
 var final_codes = []
 var final_guests = []
-var country_tocode = {}
+var country_toCode = {}
+var country_toCoord = {}
+
 
 
 var country_codes = d3.csv("/data/country_codes.csv", function(data) {
     data.forEach(function(row) {
-      country_tocode[row["name"]] = row["country-code"]
+      country_toCode[row["name"]] = row["country-code"]
         row.close = +row.close;
       })
-      console.log(final_codes)
+      // console.log(final_codes)
       // console.log(d)
 
   });
 
-var guest_data = d3.csv("/data/SHF_guests.csv", function(data) {
+var geoCoord_data = d3.csv("/data/geocoordinates.csv", function(data) {
     data.forEach(function(row) {
-      var dict = {
-        name: row["Nationality"],
-        guest_count: row['Number of Guests'],
-        country_code: country_tocode[row["Nationality"]]
-      };
-      final_guests.push(dict)
-      row.close = +row.close;
-    })
+      country_toCoord[row["Country"]] = [row["Longitude"], row['Latitude']]
+        row.close = +row.close;
+      })
+      // console.log(final_codes)
+      // console.log(d)
 
   });
+
+  var all_paths = []
+
+
+var guest_data = d3.csv("/data/SHF_guests.csv", function(data) {
+    data.forEach(function(row) {
+      var name = row["Nationality"]
+      var count = row['Number of Guests']
+      var code = country_toCode[row["Nationality"]]
+      var coordinates = country_toCoord[row["Nationality"]]
+      // if (name && count && code && coordinates){
+      var dict = {
+        name: name,
+        guest_count: count,
+        country_code: code,
+        coordinates: coordinates
+      // }
+    };
+
+      final_guests.push(dict)
+//2 10 18 24
+      row.close = +row.close;
+    })
+    for (i of final_guests) {
+    all_paths.push(coordinates_to_sumba(i['coordinates']))
+  }});
+
 
 
 

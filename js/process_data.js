@@ -17,7 +17,7 @@ var trip_data = [{"lat" : -9.6993,
 //     "code" : j.countrycode,
 //     "guest_count" : i.NumberofGuests})
 //   }
-
+//
 
 //
 //
@@ -35,12 +35,6 @@ var trip_data = [{"lat" : -9.6993,
 
 
 
-var visited_countries = ["360", "056", "840", "276", "528",
-						 "250","724", "036", "124", "458",
-						 "826", "104", "752", "031", "156",
-						 "356", "380", "348", "410", "442",
-						 "554", "702", "756", "376", "364",
-            "076", "616"];
 
 
   //---------------------------------
@@ -1025,12 +1019,25 @@ var visited_countries = ["360", "056", "840", "276", "528",
 
   }
 
-  function coordinates_to_sumba(country_name) {
-    console.log(convert_country_to_long_lat("fr"), sumba)
-    return {type: "LineString", coordinates: [convert_country_to_long_lat(country_name), sumba]
-    }
+  // function coordinates_to_sumba(country_name) {
+  //   console.log(convert_country_to_long_lat("fr"), sumba)
+  //   return {type: "LineString", coordinates: [convert_country_to_long_lat(country_name), sumba]
+  //   }
 
+  function coordinates_to_sumba(coordinates) {
+    return {type: "LineString", coordinates: [coordinates, sumba]
+    }
   }
+
+  console.log("i")
+  var hello = "world"
+  var all_paths = []
+
+  // for (i of final_guests) {
+    // all_paths.push(coordinates_to_sumba(i['coordinates']))
+  //   console.log(1);
+  //
+  // }
 
   //TO DO:
   //load the data directly from the CSV provided.
@@ -1065,10 +1072,11 @@ var visited_countries = ["360", "056", "840", "276", "528",
     "pl",
   ];
 
-  var all_paths = []
+  // console.log(final_guests.length)
+  for (i of final_guests) {
 
-  for (i of origin_countries) {
-  all_paths.push(coordinates_to_sumba(i))
-  console.log(i);
+    all_paths.push(i)
+
+  console.log(all_paths);
 
   }

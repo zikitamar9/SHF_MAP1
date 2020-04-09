@@ -1,4 +1,4 @@
-//zooming taken from https://www.knoyd.com/blog/2017/6/23/create-map-in-d3-part1
+
 
 
 //to do:
@@ -68,10 +68,15 @@ d3.json("https://unpkg.com/world-atlas@1/world/110m.json", function(error, topol
               .style("fill", "none")
               .style("stroke-width", 4)
 
-
-
-
    });
+
+
+ var visited_countries = ["360", "056", "840", "276", "528",
+ 						 "250","724", "036", "124", "458",
+ 						 "826", "104", "752", "031", "156",
+ 						 "356", "380", "348", "410", "442",
+ 						 "554", "702", "756", "376", "364",
+             "076", "616"];
 
 
  // to color the countries of origin
