@@ -55,12 +55,12 @@ ul.legend img {
 
 .arc {
 	fill: none;
-	stroke: #f46b6b;
+	stroke: #1d00f7;
     stroke-width: 2px;
 }
 
 .plane {
-	fill: #f46b6b;
+	fill: #1d00f7;
 }
 
 div.tooltip_point {
@@ -104,8 +104,8 @@ circle {
 }
 
 .background {
-	background: white;
-	fill: white;
+	background: blue;
+	fill: blue;
 }
 
 #close:hover {

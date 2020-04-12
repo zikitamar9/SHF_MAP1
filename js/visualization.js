@@ -1,6 +1,11 @@
 
 
+window.onload = function() {
+country_flags();
 
+}
+
+var load_viz = function() {
 //to do:
 //  - country labels
 //  - color gradient for country based on guest count
@@ -18,7 +23,7 @@ var projection = d3.geoMercator()
 var plane_path = d3.geoPath()
     	.projection(projection);
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#map")
     .attr("width", width)
     .attr("height", height)
     .attr("class", "map");
@@ -42,14 +47,28 @@ var legend  = d3.select(".legendContainer")
   				.append("ul")
   				.attr("class", "legend");
 
+          //add list item for every category
+var legend_items = legend.selectAll("li")
+                     .data(final_guests)
+                     .enter()
+                     .append("li")
+                     .html(function(d, i){return getLegend(d);})
+
+
+
 var tooltip_point = d3.select("body")
   	.append("div")
   	.attr("class", "tooltip_point hidden");
 
+// for
+//
+//var extent = d3.extent(guest_scale);
+//
+
 
 
 // load and display the World
-d3.json("https://unpkg.com/world-atlas@1/world/110m.json", function(error, topology) {
+d3.json("https://unpkg.com/world-atlas@1/world/50m.json", function(error, topology) {
   g.selectAll("path")
         .data(topojson.feature(topology, topology.objects.countries)
             .features)
@@ -58,18 +77,27 @@ d3.json("https://unpkg.com/world-atlas@1/world/110m.json", function(error, topol
         .attr("d", path)
         .on("click", clicked)
   	    .attr('fill', colorCountry)
+
+        // .attr('fill',function(d,i) { return color(i); });
+        // set the color of each country
+
         //create red lines to Sumba to display guest flow from all over the world
         g.selectAll("myPath")
             .data(all_paths)
             .enter()
             .append("path")
               .attr("d", function(d){return path(d)})
-              .style("stroke", "red")
+              // .transition()
+              //   		//.style("stroke-width", (0.75 / k) + "px")
+              //   		.duration(750)
+              //   		.attr("transform", 2000)
+              .attr('path', 5)
+              .style("stroke", "blue")
+              .style("stroke-opacity", 0.3)
               .style("fill", "none")
-              .style("stroke-width", 4)
+              .style("stroke-width", 1)
 
    });
-
 
  var visited_countries = ["360", "056", "840", "276", "528",
  						 "250","724", "036", "124", "458",
@@ -78,14 +106,62 @@ d3.json("https://unpkg.com/world-atlas@1/world/110m.json", function(error, topol
  						 "554", "702", "756", "376", "364",
              "076", "616"];
 
+// function shadeColor(color, percent) {
+//
+//      var R = parseInt(color.substring(1,3),16);
+//      var G = parseInt(color.substring(3,5),16);
+//      var B = parseInt(color.substring(5,7),16);
+//
+//      R = parseInt(R * (100 + percent) / 100);
+//      G = parseInt(G * (100 + percent) / 100);
+//      B = parseInt(B * (100 + percent) / 100);
+//
+//      R = (R<255)?R:255;
+//      G = (G<255)?G:255;
+//      B = (B<255)?B:255;
+//
+//      var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+//      var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+//      var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+//
+//      return "#"+RR+GG+BB;
+//  }
 
- // to color the countries of origin
+var code_tocount = {}
+
+// console.log(final_guests)
+
+  for (i of final_guests) {
+    code_tocount['country_code'] = i['country_code']
+    // console.log('hi')
+  }
+
+var color_options = ["#b3ffcc", "#00e64d", "#006622"];
+
+
+
 function colorCountry(country) {
-    if (visited_countries.includes(country.id)) {
-            return '#c8b98d';
-    } else {
-        return '#e7d8ad';
+    var country_code = country.id;
+    var guests = country_to_guest_count[country_code]
+
+  if(guests){
+
+    if (guests <= 10) {
+      return color_options[0]
     }
+    if (10 < guests && guests < 80) {
+      return color_options[1]
+      // console.log(guests)
+
+    }
+      if (guests > 80) {
+        return color_options[2]
+    }
+  }
+  else {
+      return '#e7d8ad';
+  }
+
 };
 
 //this will be used in sprint 2...
@@ -134,9 +210,7 @@ function hasContent(s, kind){
 
 // get legend items
 function getLegend(d){
-    var temp = "<img class='legend_icon' title='ICON_TITLE' \
-         src='ICON_LINK' alt='' width='50' height='50'> \
-         ICON_KIND";
+    var temp = "images/sumba.png";
     temp = temp.replace("ICON_TITLE", d.name);
     temp = temp.replace("ICON_LINK", d.url);
     temp = temp.replace("ICON_KIND", d.name);
@@ -190,19 +264,20 @@ function getIconsAndLinks(posts){
 
     keys.forEach(function(key, index){
         //if not story
-        if (key == "NoStory"){
+        if (key == "No Story"){
             var this_img = "<p>Story coming soon...</p>" ;
             st = this_img
-        } else {
-          //add image link
-            var this_img = "<a href='POST_LINK' target='_blank'><img class = 'icon' \
-                       title='ICON_KIND' src='ICON_LINK' \
-                       alt='' width='50' height='50' /></a>" ;
-            this_img = this_img.replace("POST_LINK", posts["posts"][key]);
-            this_img = this_img.replace("ICON_KIND", key);
-            this_img = this_img.replace("ICON_LINK", icon_links[key]);
-            st += this_img
         }
+        // else {
+        //   //add image link
+        //     var this_img = "<a href='POST_LINK' target='_blank'><img class = 'icon' \
+        //                title='ICON_KIND' src='ICON_LINK' \
+        //                alt='' width='50' height='50' /></a>" ;
+        //     this_img = this_img.replace("POST_LINK", posts["posts"][key]);
+        //     this_img = this_img.replace("ICON_KIND", key);
+        //     this_img = this_img.replace("ICON_LINK", icon_links[key]);
+        //     st += this_img
+        // }
     });
     return st
 }
@@ -210,6 +285,7 @@ function getIconsAndLinks(posts){
 
 // show location name on hover (still needs to be fixed)
 function showTooltip(d){
+  // console.log(d)
   var mouse = d3.mouse(svg.node()).map(function(d) {
                         return parseInt(d);
                     });
@@ -220,7 +296,7 @@ function showTooltip(d){
 	   "<div class='inner_tooltip'>" +
 	   			"<p>" + d.name + "</p>" +
         	 "</div><div>" +
-        		getIconsAndLinks(d) +
+        		d.guests + " guests" +
     			//
         	"</div>")
 	   .attr('style',
@@ -250,7 +326,7 @@ function showTooltipPoint(d){
 
 //handle all clicking and zooming
 function clicked(d) {
-  console.log(d);
+  // console.log(d);
   if (tooltip_point.classed("hidden")){
       	  var x, y, k;
 
@@ -273,7 +349,7 @@ function clicked(d) {
             		y = height / 2;
             		k = 1;
       		      centered = null;
-      		      // legend_cont.classed("hidden", false);
+      		      legend_cont.classed("hidden", false);
       	  }
 
       	  g.selectAll("path")
@@ -281,10 +357,7 @@ function clicked(d) {
 
 
       	  // make contours thinner before zoom
-      	  if (centered !== null){
-            		g.selectAll("path")
-            		 .style("stroke-width", (0.75 / k) + "px");
-          }
+
 
       	  // map transition
       	  g.transition()
@@ -298,27 +371,21 @@ function clicked(d) {
           }
           		  });
 
-      	  // filter only points in the country
-      	  var contained_points = trip_data.filter(function(point) {
-          	  	if (point.country == d.id){
-          	  		return true;
-          	  	} else {
-          	  		return false;
-          	  	}
-      	  });
-
       	  // remove all old points
       	  g.selectAll("image").remove()
 
       	  // if zooming in -> draw points
       	  if (centered !== null){
             		g.selectAll("image")
-            		 .data(contained_points)
+            		 .data(trip_data)
           		   .enter()
             		 .append("svg:image")
-            		 .attr("xlink:href", "img/location1.png")
+            		 .attr("xlink:href", function(d) {
+                   return d.flag
+                 }) //ADD SUMBA LOGO
             		 .attr("x", function(d) {
                         				return projection([d.lon, d.lat])[0];
+                                // console.log([d.lon, d.lat])
             		  })
             		 .attr("y", function(d) {
             				return projection([d.lon, d.lat])[1];
@@ -334,4 +401,5 @@ function clicked(d) {
   }
 
 
+}
 }
