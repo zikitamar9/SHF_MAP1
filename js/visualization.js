@@ -112,7 +112,7 @@ sumba_coordinates = projection(sumba);
 //             .attr("href", "images/sumba.png");
 
 var styleFlags = function(country) {
-  console.log(country);
+  // console.log(country);
   if(country.name=="Sumba") {
     return 40 + "px";
   }
@@ -194,8 +194,9 @@ d3.json("https://unpkg.com/world-atlas@1/world/50m.json", function(error, topolo
               for (country in country_to_guest_count) {
 
                 const guest_count = country_to_guest_count[country];
-                if (guest_count > lower_bound && guest_count <= upper_bound) {
-                  matching_country_codes.push(country);
+                if (guest_count >= lower_bound && guest_count <= upper_bound) {
+                  matching_country_codes.push(parseInt(country));
+                  console.log(matching_country_codes)
                 }
 
               }
@@ -203,7 +204,11 @@ d3.json("https://unpkg.com/world-atlas@1/world/50m.json", function(error, topolo
               selectedLegendRangeElement.mouseover(function(d) {
                 //var people_bounds = d.target.innerHTML.split(" to ");
                 var matching_countries = g.selectAll('path').filter(function(d) {
-                  return d.type==="Feature" && matching_country_codes.includes(d.id)
+                  // console.log(parseInt(d.id));
+                  // console.log(parseInt(matching_country_codes));
+                  return d.type==="Feature" && matching_country_codes.includes(parseInt(d.id))
+
+
                 });
                 matching_countries.style('fill', 'blue')
 
@@ -211,7 +216,7 @@ d3.json("https://unpkg.com/world-atlas@1/world/50m.json", function(error, topolo
 
               selectedLegendRangeElement.mouseleave(function(d) {
                   g.selectAll('path').filter(function(d) {
-                    return d.type==="Feature" && matching_country_codes.includes(d.id);
+                    return d.type==="Feature" && matching_country_codes.includes(parseInt(d.id));
                   }).style('fill', colorCountry)
               })
 
