@@ -5,17 +5,35 @@
   <link rel="stylesheet" type="text/css" href="css/map_style.css" />
   <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
   <script type="text/javascript" src="https://d3js.org/d3-array.v2.min.js"></script>
-
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
   <script src="https://unpkg.com/topojson@3"></script>
-    <script src="js/visualization.js"></script>
+  <script
+  src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+  integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+  crossorigin="anonymous"></script>
+  <script src="js/visualization.js"></script>
   <script src="js/process_data.js"></script>
 
 </head>
 
 <body>
 
-<svg id="map"></svg>
+<svg id="map">
 
-
+</svg>
+<div id="map-legend">
+<div class='my-legend'>
+<div class='legend-title'>Number of Guests From Country</div>
+<div class='legend-scale'>
+  <ul class='legend-labels'>
+    <li from='0' to='0'><span style='background:#e5fadc;'></span>None</li>
+    <li from='1' to='11'><span style='background:#abef95;'></span>1-10</li>
+    <li from='11' to='21'><span style='background:#8ae971;'></span>11 - 20</li>
+    <li from='21' to='31'><span style='background:#1fdb02;'></span>21 - 30</li>
+    <li from='31' to='150'><span style='background:#268c16;'></span>30+</li>
+  </ul>
+</div>
+</div>
+</div>
 </body>
 </html>

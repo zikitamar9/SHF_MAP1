@@ -1,58 +1,93 @@
 
-
+var projection_outer
+var svg_outer;
 window.onload = function() {
 country_flags();
 
 }
-
+var legend_outer;
+var width = window.innerWidth,
+    height = window.innerHeight - 20,
+    centered,
+    clicked_point;
+var scale = 100
+var translate_width = width / 2
+var global_top;
+var translate_height = height / 2
 var load_viz = function() {
+d3.select("#map").selectAll("*").remove();
 //to do:
 //  - country labels
 //  - color gradient for country based on guest count
 //  - legend
 //  - map centered around Sumba island
 
-var width = window.innerWidth,
-    height = window.innerHeight,
-    centered,
-    clicked_point;
+
 
 var projection = d3.geoMercator()
-    .translate([width / 2.2, height / 1.5]);
 
-var plane_path = d3.geoPath()
-    	.projection(projection);
+
 
 var svg = d3.select("#map")
     .attr("width", width)
     .attr("height", height)
     .attr("class", "map");
 
+svg_outer = svg
+
 var path = d3.geoPath()
-    .projection(projection);
+    .projection(projection)
+
+    // var quantize = d3.scaleQuantize()
+    //   .domain([ 0, 150 ])
+    //   .range(d3.range(3).map(function(i) { return i; }));
 
 
-var g = svg.append("g");
+projection_outer = projection
+
+var plane_path = d3.geoPath()
+    	.projection(projection);
+
+var g = svg.append("g")
+    .attr("width", "1000")
+    .attr("height", "1000")
+
+
+    //returns the range of guest values
+
+
+
+    // svg.append("g")
+    //   .attr("class", "legendQuant")
+    //   .attr("transform", "translate(20,200)");
+
+    // var legend = d3.legendColor()
+    //   .labelFormat(d3.format("d"))
+    //   .useClass(true)
+    //   .title("Legend")
+    //   .titleWidth(100)
+  //   //   // .scale(quantize);
+  //
+  //     legend_outer = legend;
+  //
+  //     svg.select(".legendQuant")
+  // .call(legend);
+
+
 //
 var tooltip = d3.select("body")
   .append("div")
   .attr("class", "tooltip hidden");
 
 //this is for the legend that is to be impelented in sprint 2
-var legend_cont = d3.select("body")
-  					.append("div")
-  					.attr("class", "legendContainer");
+
 //
-var legend  = d3.select(".legendContainer")
-  				.append("ul")
-  				.attr("class", "legend");
+// var legend  = d3.select(".legendContainer")
+//   				.append("ul")
+//   				.attr("class", "legend");
 
           //add list item for every category
-var legend_items = legend.selectAll("li")
-                     .data(final_guests)
-                     .enter()
-                     .append("li")
-                     .html(function(d, i){return getLegend(d);})
+
 
 
 
@@ -65,8 +100,76 @@ var tooltip_point = d3.select("body")
 //var extent = d3.extent(guest_scale);
 //
 
+sumba_coordinates = projection(sumba);
 
 
+// svg.append("image")
+//             .attr("x", sumba_coordinates[0])
+//             .attr("y", sumba_coordinates[1])
+//             .attr("width", 20)
+//             .attr("height", 20)
+//             .style("border-radius", "50%")
+//             .attr("href", "images/sumba.png");
+
+var styleFlags = function(country) {
+  console.log(country);
+  if(country.name=="Sumba") {
+    return 40 + "px";
+  }
+
+  if ((-5 <= country.lon && country.lon <= 20)
+  && (40 <= country.lat && country.lat <= 62)) {
+
+    return 10 + "px";
+  }
+
+  else {
+      return 20 + "px";
+  }
+
+}
+
+            var draw_flags = function() {
+                  	  // if zooming in -> draw points
+                  	  //if (centered !== null){
+                        		g.selectAll("image")
+                        		 .data(trip_data)
+                      		   .enter()
+                        		 .append("svg:image")
+                        		 .attr("xlink:href", function(d) {
+                               return d.flag
+                               // console.log(d.flag)
+                             }) //ADD SUMBA LOGO
+                        		 .attr("x", function(d) {
+                                    				return projection([d.lon - 2, d.lat])[0];
+                                            // console.log([d.lon, d.lat])
+                        		  })
+                        		 .attr("y", function(d) {
+                        				return projection([d.lon, d.lat])[1];
+                        		  })
+
+
+                        		 .attr("width", styleFlags)
+                               // console.log(d);
+                               // if(d.name=="Sumba") {
+                               //   return 40 + "px";
+                               // }
+                               // if ((-5 <= d.lon && d.lon <= 20)
+                               // && (40 <= d.lat && d.lat <= 62)) {
+                               //   console.log(d);
+                               //   console.log("THis countRy matCHES");
+                               //   return 10 + "px";
+                               // }
+                               // return 20 + "px";
+
+                             .attr("height",styleFlags)
+                        		 .on("mousemove", showTooltip)
+                             .on("mouseout", hideTooltip)
+                        		 ///.on("click", showTooltipPoint)
+                      //}
+
+
+            }
 // load and display the World
 d3.json("https://unpkg.com/world-atlas@1/world/50m.json", function(error, topology) {
   g.selectAll("path")
@@ -78,6 +181,41 @@ d3.json("https://unpkg.com/world-atlas@1/world/50m.json", function(error, topolo
         .on("click", clicked)
   	    .attr('fill', colorCountry)
 
+        global_top = g
+
+        // Color the country when the legend is highligted
+          $(".legend-labels").children().each(function() {
+              var selectedLegendRangeElement = $(this);
+
+              var lower_bound = parseInt(selectedLegendRangeElement.attr("from"))
+              var upper_bound = parseInt(selectedLegendRangeElement.attr("to"))
+
+              var matching_country_codes = [];
+              for (country in country_to_guest_count) {
+
+                const guest_count = country_to_guest_count[country];
+                if (guest_count > lower_bound && guest_count <= upper_bound) {
+                  matching_country_codes.push(country);
+                }
+
+              }
+
+              selectedLegendRangeElement.mouseover(function(d) {
+                //var people_bounds = d.target.innerHTML.split(" to ");
+                var matching_countries = g.selectAll('path').filter(function(d) {
+                  return d.type==="Feature" && matching_country_codes.includes(d.id)
+                });
+                matching_countries.style('fill', 'blue')
+
+              })
+
+              selectedLegendRangeElement.mouseleave(function(d) {
+                  g.selectAll('path').filter(function(d) {
+                    return d.type==="Feature" && matching_country_codes.includes(d.id);
+                  }).style('fill', colorCountry)
+              })
+
+          })
         // .attr('fill',function(d,i) { return color(i); });
         // set the color of each country
 
@@ -97,6 +235,8 @@ d3.json("https://unpkg.com/world-atlas@1/world/50m.json", function(error, topolo
               .style("fill", "none")
               .style("stroke-width", 1)
 
+        draw_flags();
+
    });
 
  var visited_countries = ["360", "056", "840", "276", "528",
@@ -106,26 +246,7 @@ d3.json("https://unpkg.com/world-atlas@1/world/50m.json", function(error, topolo
  						 "554", "702", "756", "376", "364",
              "076", "616"];
 
-// function shadeColor(color, percent) {
-//
-//      var R = parseInt(color.substring(1,3),16);
-//      var G = parseInt(color.substring(3,5),16);
-//      var B = parseInt(color.substring(5,7),16);
-//
-//      R = parseInt(R * (100 + percent) / 100);
-//      G = parseInt(G * (100 + percent) / 100);
-//      B = parseInt(B * (100 + percent) / 100);
-//
-//      R = (R<255)?R:255;
-//      G = (G<255)?G:255;
-//      B = (B<255)?B:255;
-//
-//      var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
-//      var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
-//      var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
-//
-//      return "#"+RR+GG+BB;
-//  }
+
 
 var code_tocount = {}
 
@@ -136,30 +257,37 @@ var code_tocount = {}
     // console.log('hi')
   }
 
-var color_options = ["#b3ffcc", "#00e64d", "#006622"];
 
+var color_options = ['#abef95',"#8ae971", "#1fdb02","#268c16"];
 
 
 function colorCountry(country) {
-    var country_code = country.id;
+    var country_code = parseInt(country.id);
     var guests = country_to_guest_count[country_code]
 
   if(guests){
 
-    if (guests <= 10) {
+    if (1 <= guests && guests <= 10) {
       return color_options[0]
     }
-    if (10 < guests && guests < 80) {
+
+    if (11 <= guests && guests < 20) {
       return color_options[1]
       // console.log(guests)
 
     }
-      if (guests > 80) {
-        return color_options[2]
+
+    if (21 <= guests && guests < 30) {
+      return color_options[2]
+      // console.log(guests)
+    }
+
+      if (guests => 30) {
+        return color_options[3]
     }
   }
   else {
-      return '#e7d8ad';
+      return '#c88925';
   }
 
 };
@@ -201,6 +329,7 @@ function colorCountryLegend(country, active_countries) {
     }
 };
 
+
 function hasContent(s, kind){
 
 	var post_keys = Object.keys(s.posts);
@@ -210,7 +339,7 @@ function hasContent(s, kind){
 
 // get legend items
 function getLegend(d){
-    var temp = "images/sumba.png";
+    var temp = "placeholder";
     temp = temp.replace("ICON_TITLE", d.name);
     temp = temp.replace("ICON_LINK", d.url);
     temp = temp.replace("ICON_KIND", d.name);
@@ -218,17 +347,16 @@ function getLegend(d){
 };
 
 
-
-var zoom = d3.zoom()
-    .on("zoom",function() {
-        var z = d3.event.transform;
-        g.attr("transform", z);
-        g.selectAll("path")
-            .attr("d", path.projection(projection));
-
-        g.selectAll("circle")
-         .attr("r", width / 300 / z.k);
-});
+// var zoom = d3.zoom()
+//     .on("zoom",function() {
+//         var z = d3.event.transform;
+//         g.attr("transform", z);
+//         g.selectAll("path")
+//             .attr("d", path.projection(projection));
+//
+//         g.selectAll("circle")
+//          .attr("r", width / 100 / z.k);
+// });
 
 // // show country id on hover
 function showTooltipCountry(d){
@@ -295,8 +423,8 @@ function showTooltip(d){
 	   .html("<span id='close' onclick='hideTooltipPoint()'>x</span>" +
 	   "<div class='inner_tooltip'>" +
 	   			"<p>" + d.name + "</p>" +
-        	 "</div><div>" +
-        		d.guests + " guests" +
+        	 "</div><div>" + "Number of guests: " +
+        		d.guests +
     			//
         	"</div>")
 	   .attr('style',
@@ -316,7 +444,7 @@ function showTooltipPoint(d){
 	   "<div class='inner_tooltip'>" +
 	   			"<p>" + d.name + "</p>" +
         	 "</div><div>" +
-        		getIconsAndLinks(d) +
+        		// getIconsAndLinks(d) +
     			//
         	"</div>")
   .attr('style',
@@ -325,8 +453,9 @@ function showTooltipPoint(d){
 
 
 //handle all clicking and zooming
-function clicked(d) {
+function clicked(d) {}
   // console.log(d);
+  var d = 5
   if (tooltip_point.classed("hidden")){
       	  var x, y, k;
 
@@ -344,12 +473,13 @@ function clicked(d) {
             		y = (bounds[0][1] + bounds[1][1]) / 2;
             		k = Math.min(width / dx, height / dy);
             		centered = d;
-      	  } else {
+      	  }
+           else {
             		x = width / 2;
             		y = height / 2;
             		k = 1;
       		      centered = null;
-      		      legend_cont.classed("hidden", false);
+      		      //legend_cont.classed("hidden", false);
       	  }
 
       	  g.selectAll("path")
@@ -360,46 +490,23 @@ function clicked(d) {
 
 
       	  // map transition
-      	  g.transition()
-            		//.style("stroke-width", (0.75 / k) + "px")
-            		.duration(750)
-            		.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
-            		.on('end', function() {
-                  			if (centered === null){
-                  			  g.selectAll("path")
-                  			   .style("stroke-width", (0.75 / k) + "px");
-          }
-          		  });
+      	  // g.transition()
+          //   		//.style("stroke-width", (0.75 / k) + "px")
+          //   		.duration(750)
+          //   		.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+          //   		.on('end', function() {
+          //         			if (centered === null){
+          //         			  g.selectAll("path")
+          //         			   .style("stroke-width", (0.75 / k) + "px");
+          // }
+          // 		  });
 
       	  // remove all old points
       	  g.selectAll("image").remove()
 
-      	  // if zooming in -> draw points
-      	  if (centered !== null){
-            		g.selectAll("image")
-            		 .data(trip_data)
-          		   .enter()
-            		 .append("svg:image")
-            		 .attr("xlink:href", function(d) {
-                   return d.flag
-                 }) //ADD SUMBA LOGO
-            		 .attr("x", function(d) {
-                        				return projection([d.lon, d.lat])[0];
-                                // console.log([d.lon, d.lat])
-            		  })
-            		 .attr("y", function(d) {
-            				return projection([d.lon, d.lat])[1];
-            		  })
-            		 .attr("width", 30 / k + "px")
-         .attr("height", 30 / k + "px")
-            		 .on("mousemove", showTooltip)
-                 .on("mouseout", hideTooltip)
-            		 .on("click", showTooltipPoint)
-          }
-  } else {
-            		hideTooltipPoint(d);
-  }
-
-
 }
+
+
+
+
 }

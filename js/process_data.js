@@ -22,7 +22,8 @@ var country_flags_loaded = false;
 
 // to import flags
 var country_flags = function() { d3.tsv("https://raw.githubusercontent.com/euctrl-pru/dashboard/master/data/world-country-flags.tsv").row(function(row) {
-  country_toFlag[row["id"]] = row["url"]
+  country_toFlag[parseInt(row["id"])] = row["url"]
+  // console.log(parseInt(row["id"]))
   // console.log(row)
   row.close = +row.close;
 }).get(function() {
@@ -36,7 +37,8 @@ var country_codes_loaded = false;
 
 var country_codes = function() { d3.csv("/data/country_codes.csv").row(function(row) {
   // country_toCode[row["name"]] = [row["country-code"], row["alpha-2"]]
-  country_toCode[row["name"]] = [row["country-code"]]
+  country_toCode[row["name"]] = [parseInt(row["country-code"])]
+  console.log(row["id"])
 
   // console.log(country_toCode[row["short"]])
   // console.log(country_toCode[row["name"]])
@@ -70,20 +72,15 @@ var color_options = ["#7CFC00", "#32CD32", "#006400"];
 
 var all_done = false;
 var guest_data = function() { d3.csv("/data/SHF_guests.csv").row(function(row) {
-        console.log("I SHOULD BE FIRST!");
         var name = row["Nationality"]
         var count = parseInt(row['Number of Guests'])
         var code = country_toCode[row["Nationality"]]
         var flag = country_toFlag[code]
+        // console.log(country_toFlag[code])
         // console.log(flag, code) *
         // var short = country_toCode[row["Nationality"][1]]
         var coordinates = country_toCoord[row["Nationality"]]
         // var flag = country_toFlag[row["url"]]
-        console.log("before check");
-        console.log("name: " + name);
-        console.log("count: " + count);
-        console.log("code: " + code);
-        console.log("coordinates: " + coordinates);
         if (name && count && code && coordinates){
           var dict = {
             name: name,
@@ -93,13 +90,11 @@ var guest_data = function() { d3.csv("/data/SHF_guests.csv").row(function(row) {
             coordinates: coordinates
           }
           country_to_guest_count[code] = count;
-          console.log("ezik: done here line 87");
           return dict
 
           // console.log(dict)
         };
 
-        console.log("ezik: failed line 97");
         //row.close = +row.close;
 
         //2 10 18 24
@@ -107,13 +102,11 @@ var guest_data = function() { d3.csv("/data/SHF_guests.csv").row(function(row) {
 
 
   }).get(function(error, data) {
-    console.log(error);
     final_guests = data;
   //console.log("I SHOULD BE sECond!");
   for (i of final_guests) {
     all_paths.push(coordinates_to_sumba(i));
   }
-  console.log("I SHOULD BE sECond! " + final_guests.length);
 
   for (i of final_guests) {
       var dict = {"lat" : i['coordinates'][1],
@@ -204,18 +197,19 @@ function coordinates_to_sumba(country) {
   var name = country['name']
   var is_european = (40 <= coordinates[1] && coordinates[1] <= 62)
   && (-5 <= coordinates[0] && coordinates[0] <= 20)
+
+  var is_brazil = (-55 == coordinates[0]) && (-10 == coordinates[1])
+  var is_USA = (-97 == coordinates[0]) && (38 == coordinates[1])
+
   // var is_asia = (40 <= country['coordinates'[1]] && country['coordinates'[1]] <= 62) && (-5 <= country['coordinates'[0]] && country['coordinates'[0]] <= 20)
   // if (name = 'Belgium' || 'Germany' || 'Netherlands' || 'France' || 'Spain'
   // || 'Poland' || 'Azerbaijan' || 'Italy' || 'Switzerland' || 'Luxembourg')
   // var is_european = (40 <= coordinates[1] && coordinates[0]
-  console.log(coordinates);
+
   // console.log(coordinates[1])
-  if (is_european) {
+
     return {type: "LineString", coordinates: [coordinates, sumba]
-  }}
-  else {
-    return {type: "LineString", coordinates: [coordinates, sumba]
-  }
+
 }
 }
 //var all_paths = [];
